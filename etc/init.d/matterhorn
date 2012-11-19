@@ -1,0 +1,122 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          opencast matterhorn
+# # Required-Start:    $remote_fs $syslog
+# # Required-Stop:     $remote_fs $syslog
+# # Default-Start:     2 3 4 5
+# # Default-Stop:      0 1 6
+# # Short-Description: lecture recording and management system
+### END INIT INFO
+# /etc/init.d/matterhorn
+#
+
+set -e
+
+##
+# These variables are set in the configuration scripts.
+##
+#eg:  /opt/matterhorn
+MATTERHORN=${MATTERHORN_HOME:-/opt/matterhorn}
+#eg:  /opt/matterhorn/felix, or $MATTERHORN/felix
+FELIX_HOME=${FELIX_HOME:-$MATTERHORN}
+#eg:  /opt/matterhorn/capture-agent, or $MATTERHORN/capture-agent
+CA=${CA_DIR:-$MATTERHORN/capture-agent}
+#eg:  Commonly opencast or matterhorn.  Can also be your normal user if you are testing.
+MATTERHORN_USER=matterhorn
+# Matterhorn group account
+MATTERHORN_GROUP=matterhorn
+M2_REPOSITORY=${M2_REPO:-$HOME/.m2/repository}
+#Enable this if this machine is a CA.  This will enable capture device autoconfiguration.
+IS_CA=false
+
+#name of this process
+NAME=matterhorn
+
+#location of the log directory for opencast matterhorn
+MATTERHORN_LOGDIR=/var/log/matterhorn
+
+#Matterhorn PID file
+MATTERHORN_PID=/var/run/${NAME}/${NAME}.pid
+
+PATH=$PATH:$FELIX
+
+##
+# To enable the debugger on the vm, enable all of the following options
+##
+
+DEBUG_PORT="8000"
+DEBUG_SUSPEND="n"
+#DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
+
+##
+# Only change the line below if you want to customize the server
+##
+
+MAVEN_ARG="-DM2_REPO=$M2_REPOSITORY"
+
+FELIX_CONFIG_DIR="$FELIX_HOME/etc"
+FELIX_WORK_DIR="$FELIX_HOME/work"
+
+FELIX="-Dfelix.home=$FELIX_HOME"
+FELIX_WORK="-Dfelix.work=$FELIX_WORK_DIR"
+FELIX_CONFIG_OPTS="-Dfelix.config.properties=file:${FELIX_CONFIG_DIR}/config.properties -Dfelix.system.properties=file:${FELIX_CONFIG_DIR}/system.properties"
+FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX_CONFIG_DIR/load"
+JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+FELIX_OPTS="$FELIX $FELIX_WORK $FELIX_CONFIG_OPTS $FELIX_FILEINSTALL_OPTS"
+
+PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX_CONFIG_DIR"
+
+PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN"
+MATTERHORN_LOGGING_OPTS="-Dopencast.logdir=$MATTERHORN_LOGDIR"
+ECLIPSELINK_LOGGING_OPTS="-Declipselink.logging.level=SEVERE"
+UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX_CONFIG_DIR/services/java.util.logging.properties"
+
+LOG_OPTS="$PAX_LOGGING_OPTS $MATTERHORN_LOGGING_OPTS $ECLIPSELINK_LOGGING_OPTS $UTIL_LOGGING_OPTS"
+
+GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
+JAVA_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=256m"
+
+FELIX_CACHE="$FELIX_WORK_DIR/felix-cache"
+
+###############################
+### NO CHANGES NEEDED BELOW ###
+###############################
+
+case "$1" in
+  start)
+    echo -n "Starting Matterhorn as user $MATTERHORN_USER: " 
+
+    # Make sure matterhorn bundles are reloaded
+    if [ -d "$FELIX_CACHE" ]; then
+      echo "Removing cached matterhorn bundles from $FELIX_CACHE"
+      for bundle in `find "$FELIX_CACHE" -type f -name bundle.location | xargs grep --files-with-match -e "file:" | sed -e s/bundle.location// `; do
+        rm -r $bundle
+      done
+    fi
+
+    # starting felix
+    start-stop-daemon --start --make-pidfile --background --pidfile /var/run/matterhorn/matterhorn.pid --chdir $FELIX_HOME --chuid $MATTERHORN_USER --group $MATTERHORN_GROUP --exec /usr/bin/java -- -Dgosh.args='--noshutdown -c noop=true' $DEBUG_OPTS $FELIX_OPTS $GRAPHICS_OPTS $TEMP_OPTS $MAVEN_ARG $JAVA_OPTS $PAX_CONFMAN_OPTS $LOG_OPTS $JMX_OPTS -jar bin/felix.jar $FELIX_CACHE
+    echo "done."
+
+  stop)
+    echo -n "Stopping Matterhorn: "
+
+    start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --exec /usr/bin/java
+
+    echo "done."
+
+  restart)
+    $0 stop
+    $0 start
+
+  status)
+    status_of_proc -p /var/run/${NAME}/${NAME}.pid /usr/bin/java matterhorn
+
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+
+esac
+
+exit 0
+`'`;;;;;
