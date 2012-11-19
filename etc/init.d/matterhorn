@@ -12,6 +12,9 @@
 
 set -e
 
+#Include lsb functions
+. /lib/lsb/init-functions
+
 ##
 # These variables are set in the configuration scripts.
 ##
@@ -97,26 +100,25 @@ case "$1" in
     # starting felix
     start-stop-daemon --start --make-pidfile --background --pidfile /var/run/matterhorn/matterhorn.pid --chdir $FELIX_HOME --chuid $MATTERHORN_USER --group $MATTERHORN_GROUP --exec /usr/bin/java -- -Dgosh.args='--noshutdown -c noop=true' $DEBUG_OPTS $FELIX_OPTS $GRAPHICS_OPTS $TEMP_OPTS $MAVEN_ARG $JAVA_OPTS $PAX_CONFMAN_OPTS $LOG_OPTS $JMX_OPTS -jar bin/felix.jar $FELIX_CACHE
     echo "done."
-
+  ;;
   stop)
     echo -n "Stopping Matterhorn: "
 
     start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --exec /usr/bin/java
 
     echo "done."
-
+  ;;
   restart)
     $0 stop
     $0 start
-
+  ;;
   status)
     status_of_proc -p /var/run/${NAME}/${NAME}.pid /usr/bin/java matterhorn
-
+  ;;
   *)
     echo "Usage: $0 {start|stop|restart|status}"
     exit 1
-
+  ;;
 esac
 
 exit 0
-`'`;;;;;
