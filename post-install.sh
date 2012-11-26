@@ -27,5 +27,8 @@ case "$1" in
         fi
 
         #Fix ownership folders
-        chown $MATTERHORN_USER:$MATTERHORN_GROUP /var/log/matterhorn /opt/matterhorn/work /opt/matterhorn/inbox /var/run/matterhorn
+        chown $MATTERHORN_USER:$MATTERHORN_GROUP /var/log/matterhorn /var/run/matterhorn
+
+        #Fix ownership opencast install
+        chown -R $MATTERHORN_USER:$MATTERHORN_GROUP /opt/matterhorn
 esac
