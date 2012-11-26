@@ -20,12 +20,12 @@ case "$1" in
         if ! getent passwd matterhorn > /dev/null; then
             adduser --home $MATTERHORN_HOME \
                     --system \
-                    --group $MATTERHORN_GROUP \
+                    --group \
                     --no-create-home \
                     --disabled-password \
                     --quiet $MATTERHORN_USER 
         fi
 
         #Fix ownership folders
-        chown $MATTERHORN_USER:$MATTERHORN_GROUP /var/log/matterhorn /var/cache/matterhorn /opt/matterhorn/work /opt/matterhorn/inbox
+        chown $MATTERHORN_USER:$MATTERHORN_GROUP /var/log/matterhorn /opt/matterhorn/work /opt/matterhorn/inbox /var/run/matterhorn
 esac
