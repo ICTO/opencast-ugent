@@ -23,11 +23,9 @@ case "$1" in
                     --group $MATTERHORN_GROUP \
                     --no-create-home \
                     --disabled-password \
-                    --quiet $MATTERHORN_USER \
+                    --quiet $MATTERHORN_USER 
         fi
 
         #Fix ownership folders
         chown $MATTERHORN_USER:$MATTERHORN_GROUP /var/log/matterhorn /var/cache/matterhorn /opt/matterhorn/work /opt/matterhorn/inbox
-        ;;
 esac
-
