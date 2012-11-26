@@ -6,7 +6,6 @@ MATTERHORN_HOME=/opt/matterhorn
 MATTERHORN_USER=matterhorn
 MATTERHORN_GROUP=matterhorn
 
-
 case "$1" in
     configure)
         #start opencast matterhorn on boot
@@ -26,6 +25,9 @@ case "$1" in
                     --disabled-password \
                     --quiet $MATTERHORN_USER \
         fi
-    ;;
+
+        #Fix ownership folders
+        chown $MATTERHORN_USER:$MATTERHORN_GROUP /var/log/matterhorn /var/cache/matterhorn /opt/matterhorn/work /opt/matterhorn/inbox
+        ;;
 esac
 
