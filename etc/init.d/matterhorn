@@ -22,6 +22,8 @@ set -e
 MATTERHORN=${MATTERHORN_HOME:-/opt/matterhorn}
 #eg:  /opt/matterhorn/felix, or $MATTERHORN/felix
 FELIX_HOME=${FELIX_HOME:-$MATTERHORN}
+# Matterhorn conf directory
+MATTERHORN_CONFIG=$MATTERHORN/etc
 #eg:  /opt/matterhorn/capture-agent, or $MATTERHORN/capture-agent
 CA=${CA_DIR:-$MATTERHORN/capture-agent}
 #eg:  Commonly opencast or matterhorn.  Can also be your normal user if you are testing.
@@ -29,8 +31,9 @@ MATTERHORN_USER=matterhorn
 # Matterhorn group account
 MATTERHORN_GROUP=matterhorn
 M2_REPOSITORY=${M2_REPO:-$HOME/.m2/repository}
-#Enable this if this machine is a CA.  This will enable capture device autoconfiguration.
-IS_CA=false
+
+#Include matterhorn configuration
+. $MATTERHORN_CONFIG/matterhorn.conf
 
 #name of this process
 NAME=matterhorn
@@ -62,10 +65,11 @@ FELIX_WORK_DIR="$FELIX_HOME/work"
 
 FELIX="-Dfelix.home=$FELIX_HOME"
 FELIX_WORK="-Dfelix.work=$FELIX_WORK_DIR"
-FELIX_CONFIG_OPTS="-Dfelix.config.properties=file:${FELIX_CONFIG_DIR}/config.properties -Dfelix.system.properties=file:${FELIX_CONFIG_DIR}/system.properties"
+FELIX_CONFIG_OPTS="-Dfelix.config.properties=file:${FELIX_CONFIG_DIR}/config.properties"
+FELIX_CONFIG_PROPS="-Dfelix.system.properties=file:${FELIX_CONFIG_DIR}/profiles/${MATTERHORN_NODE_TYPE}.properties"
 FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX_CONFIG_DIR/load"
 JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
-FELIX_OPTS="$FELIX $FELIX_WORK $FELIX_CONFIG_OPTS $FELIX_FILEINSTALL_OPTS"
+FELIX_OPTS="$FELIX $FELIX_WORK $FELIX_CONFIG_OPTS $FELIX_CONFIG_PROPS $FELIX_FILEINSTALL_OPTS"
 
 PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX_CONFIG_DIR"
 
