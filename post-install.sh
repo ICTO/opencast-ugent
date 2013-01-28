@@ -20,6 +20,7 @@ case "$1" in
         if ! getent passwd matterhorn > /dev/null; then
             adduser --home $MATTERHORN_HOME \
                     --system \
+		    --shell /bin/bash \
                     --group \
                     --no-create-home \
                     --disabled-password \

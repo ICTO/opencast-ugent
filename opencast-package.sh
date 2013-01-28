@@ -1,7 +1,7 @@
 #!/bin/sh 
 
 NAME=opencast-matterhorn
-VERSION=1.4.0-r13262-6
+VERSION=1.4.0-1-r13724
 
 fpm -s dir -t deb -n $NAME -v $VERSION -d "openjdk-6-jre" -m "Kristof Keppens <k.keppens@ugent.be>" \
     --description "Opencast Matterhorn" --post-install post-install.sh \
