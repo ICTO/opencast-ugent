@@ -109,11 +109,12 @@ case "$1" in
     echo -n "Stopping Matterhorn: "
 
     start-stop-daemon --stop --pidfile $MATTERHORN_PID --exec /usr/bin/java
-
+    sleep 5
     echo "done."
   ;;
   restart)
     $0 stop
+    sleep 5
     $0 start
   ;;
   status)
